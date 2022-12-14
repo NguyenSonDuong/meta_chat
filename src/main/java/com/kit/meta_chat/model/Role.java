@@ -26,8 +26,13 @@ public class Role extends BaseEntity{
     @Column(name = "description", nullable = false)
     private String description;
 
-    @OneToMany
-    @JoinTable(name = "permission", joinColumns = {
+    public Role(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
+    @OneToMany(cascade = {CascadeType.ALL})
+    @JoinTable(name = "role_permission", joinColumns = {
             @JoinColumn(name = "role_id")
     },
     inverseJoinColumns = {

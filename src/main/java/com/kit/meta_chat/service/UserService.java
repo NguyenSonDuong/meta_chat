@@ -10,7 +10,7 @@ import java.util.List;
 @Service
 public interface UserService {
 
-    public UserDTO readUser(String emailOrUsername, String password);
+    public Object readUser(String emailOrUsername, String password);
     public UserDTO createUserInfo(String email ,String username, String password, int sex);
     public UserDTO createUser(String email ,String username, String password);
     public List<UserDTO> search(String uuid, String username, String email, int sex);

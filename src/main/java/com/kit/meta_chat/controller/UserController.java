@@ -7,6 +7,7 @@ import com.kit.meta_chat.request.LoginRequest;
 import com.kit.meta_chat.request.RegisterRequest;
 import com.kit.meta_chat.request.RequestBinding;
 import com.kit.meta_chat.service.UserService;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -30,7 +31,7 @@ public class UserController {
     @PostMapping(value = "/login")
     public ResponseEntity<?> readUser(@RequestBody @Validated LoginRequest loginRequest , BindingResult result){
         RequestBinding.CheckValidate(result);
-        UserDTO user = userService.readUser(loginRequest.getEmailOrUsername(), loginRequest.getPassword());
+        Object user = userService.readUser(loginRequest.getEmailOrUsername(), loginRequest.getPassword());
         return ResponseEntity.ok(user);
     }
 
@@ -39,6 +40,11 @@ public class UserController {
         RequestBinding.CheckValidate(result);
         UserDTO user = userService.createUser(registerRequest.getEmail(),registerRequest.getUsername(), registerRequest.getPassword());
         return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/checkRoler")
+    public ResponseEntity<?> readUserAll(){;
+        return ResponseEntity.ok("user");
     }
 
 
