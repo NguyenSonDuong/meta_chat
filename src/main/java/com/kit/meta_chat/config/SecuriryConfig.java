@@ -1,17 +1,33 @@
 package com.kit.meta_chat.config;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.kit.meta_chat.jwt.JwtRequestFilter;
 import com.kit.meta_chat.repository.TokenRepository;
+import com.kit.meta_chat.responsive.BaseRespo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -28,22 +44,32 @@ public class SecuriryConfig {
         jwtRequestFilter.setVerificationTokenService(tokenRepository);
         http
                 .csrf(cors->cors.disable())
-                .authorizeRequests(auth-> {
-                    try {
-                        auth
-                                .antMatchers(new String[]{"/user/login","/user/register"}).permitAll()
-                                .anyRequest().authenticated()
-                                .and()
-                                .formLogin(httpSecurityFormLoginConfigurer -> {
-                                    httpSecurityFormLoginConfigurer.failureForwardUrl("/user/get");
-                                    httpSecurityFormLoginConfigurer.failureHandler(authenticationFailureHandler());
-                                });
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
-                        throw new RuntimeException(e);
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authorizeHttpRequests()
+                .antMatchers(new String[]{"/user/login","/user/register"}).permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(new Customizer<ExceptionHandlingConfigurer<HttpSecurity>>() {
+                    @Override
+                    public void customize(ExceptionHandlingConfigurer<HttpSecurity> httpSecurityExceptionHandlingConfigurer) {
+                        httpSecurityExceptionHandlingConfigurer.authenticationEntryPoint(new AuthenticationEntryPoint() {
+                            @Override
+                            public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+                                System.out.println("e.getMessage()");
+                                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                                String json = ow.writeValueAsString(BaseRespo.builder().code(-1).title("Authentication fails").content(null).status("error").build());
+                                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                                response.setContentType("application/json");
+                                response.setCharacterEncoding("UTF-8");
+                                response.getWriter().write(json);
+                            }
+                        });
+
                     }
-                })
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+                });
         return http.build();
     }
     @Bean

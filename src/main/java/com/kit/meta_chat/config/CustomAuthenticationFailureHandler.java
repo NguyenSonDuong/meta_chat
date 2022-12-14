@@ -30,4 +30,6 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
         httpServletResponse.setCharacterEncoding("UTF-8");
         httpServletResponse.getWriter().write(json);
     }
+
+
 }
