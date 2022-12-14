@@ -1,6 +1,7 @@
 package com.kit.meta_chat.controller;
 
 
+import com.kit.meta_chat.model.dto.RoleKey;
 import com.kit.meta_chat.model.dto.UserDTO;
 import com.kit.meta_chat.repository.UserRepository;
 import com.kit.meta_chat.request.LoginRequest;
@@ -30,24 +31,25 @@ public class UserController {
     private UserRepository userRepository;
 
     @PostMapping(value = "/login")
-    public ResponseEntity<?> readUser(@RequestBody @Validated LoginRequest loginRequest , BindingResult result){
+    public ResponseEntity<?> login(@RequestBody @Validated LoginRequest loginRequest , BindingResult result){
         RequestBinding.CheckValidate(result);
-        Object user = userService.readUser(loginRequest.getEmailOrUsername(), loginRequest.getPassword());
+        Object user = userService.login(loginRequest.getEmailOrUsername(), loginRequest.getPassword());
         return ResponseEntity.ok(user);
     }
 
     @PostMapping(value = "/register")
-    public ResponseEntity<?> createUser(@RequestBody @Validated RegisterRequest registerRequest , BindingResult result){
+    public ResponseEntity<?> register(@RequestBody @Validated RegisterRequest registerRequest , BindingResult result){
         RequestBinding.CheckValidate(result);
-        UserDTO user = userService.createUser(registerRequest.getEmail(),registerRequest.getUsername(), registerRequest.getPassword());
+        UserDTO user = userService.register(registerRequest.getEmail(),registerRequest.getUsername(), registerRequest.getPassword());
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/checkRoler")
-    @PreAuthorize("hasAnyAuthority('READ_USER')")
-    public ResponseEntity<?> readUserAll(){;
-        return ResponseEntity.ok("user");
+    @PostMapping(value = "/create")
+    @PreAuthorize("hasAnyAuthority('ADMIN_CREATE_USER')")
+    public ResponseEntity<?> createUser(@RequestBody @Validated RegisterRequest registerRequest , BindingResult result){
+        RequestBinding.CheckValidate(result);
+        UserDTO user = userService.register(registerRequest.getEmail(),registerRequest.getUsername(), registerRequest.getPassword());
+        return ResponseEntity.ok(user);
     }
-
 
 }

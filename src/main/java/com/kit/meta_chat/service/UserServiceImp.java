@@ -9,6 +9,7 @@ import com.kit.meta_chat.mapping.UserMapping;
 import com.kit.meta_chat.model.Permission;
 import com.kit.meta_chat.model.Role;
 import com.kit.meta_chat.model.User;
+import com.kit.meta_chat.model.dto.RoleKey;
 import com.kit.meta_chat.model.dto.UserDTO;
 import com.kit.meta_chat.model.token.Token;
 import com.kit.meta_chat.repository.RoleRepository;
@@ -39,7 +40,7 @@ public class UserServiceImp implements UserService{
 
 
     @Override
-    public Object readUser(String emailOrUsername, String password) {
+    public Object login(String emailOrUsername, String password) {
         String regex = "^(\\S+)@([\\S]+)$";
         Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
         Matcher matcher = pattern.matcher(emailOrUsername);
@@ -91,28 +92,33 @@ public class UserServiceImp implements UserService{
         Role rol = new Role(role, (role.equals("USER") ? "Người dùng" : (role.equals("ADMIN") ? "Quản trị viên" : "Khách")));
         rol.setPermissions(new HashSet<>());
         rol.getPermissions().addAll(GetPremission(role));
+        Set<Role> roles = new HashSet<>();
+        roles.add(rol);
+
+
+
+        return createUser(email,username,password,sex,roles);
+    }
+
+    @Override
+    public UserDTO createUser(String email, String username, String password, int sex, Set<Role> roleSet) {
+        if(userRepository.existsByUsernameOrEmail(username,email))
+            throw new UserException("Username or email is exits");
         String passwordEncrypt = new BCryptPasswordEncoder().encode(password);
         User user = User.builder()
                 .username(username)
                 .password(passwordEncrypt)
                 .email(email)
                 .build();
-        user.setRoles(new HashSet<>());
-        user.getRoles().add(rol);
-
-        if(sex>0)
-            user.setSex(SexMapping.sexMapping(sex));
-
+        user.setRoles(roleSet);
         User userSave = userRepository.saveAndFlush(user);
-
         if(userSave == null)
             throw new UserException("Something were wrong");
-
         return UserMapping.convertUserDTO(userSave);
     }
 
     @Override
-    public UserDTO createUser(String email, String username, String password) {
+    public UserDTO register(String email, String username, String password) {
         return createUserInfo(email,username,password,-1);
     }
 
@@ -141,22 +147,21 @@ public class UserServiceImp implements UserService{
     public Set<Permission> GetPremission(String role){
         Set<Permission> permissions = new HashSet<Permission>();
         if(role.equals("USER")){
-            permissions.add(new Permission("CREATE_USER","Tạo tài khoản"));
-            permissions.add(new Permission("READ_USER","Đọc thông tin tài khoản"));
-            permissions.add(new Permission("UPDATE_USER","Sửa thông tài khoản"));
-            permissions.add(new Permission("MESSAGE","Gửi tin nhắn"));
+            permissions.add(new Permission(RoleKey.USER_READ_USER,"Đọc thông tin tài khoản"));
+            permissions.add(new Permission(RoleKey.USER_UPDATE_USER,"Sửa thông tài khoản"));
+            permissions.add(new Permission(RoleKey.USER_MESSAGE,"Gửi tin nhắn"));
         }
         if(role.equals("ADMIN")){
-            permissions.add(new Permission("CREATE_USER","Tạo tài khoản"));
-            permissions.add(new Permission("READ_USER","Đọc thông tin tài khoản"));
-            permissions.add(new Permission("UPDATE_USER","Sửa thông tài khoản"));
-            permissions.add(new Permission("DELETE_USER","Xóa tài khoản"));
-            permissions.add(new Permission("MESSAGE","Gửi tin nhắn"));
-            permissions.add(new Permission("CHANGE_ROLE_USER","Thay đổi quyền người dùng"));
+            permissions.add(new Permission(RoleKey.ADMIN_CREATE_USER,"Tạo tài khoản"));
+            permissions.add(new Permission(RoleKey.ADMIN_READ_USER,"Đọc thông tin tài khoản"));
+            permissions.add(new Permission(RoleKey.ADMIN_UPDATE_USER,"Sửa thông tài khoản"));
+            permissions.add(new Permission(RoleKey.ADMIN_DELETE_USER,"Xóa tài khoản"));
+            permissions.add(new Permission(RoleKey.ADMIN_MESSAGE,"Gửi tin nhắn"));
+            permissions.add(new Permission(RoleKey.ADMIN_CHANGE_ROLE_USER,"Thay đổi quyền người dùng"));
         }
         if(role.equals("CUSTOMER")){
-            permissions.add(new Permission("READ_USER","Đọc thông tin tài khoản"));
-            permissions.add(new Permission("MESSAGE","Gửi tin nhắn"));
+            permissions.add(new Permission(RoleKey.CUSTOMER_READ_USER,"Đọc thông tin tài khoản"));
+            permissions.add(new Permission(RoleKey.CUSTOMER_MESSAGE,"Gửi tin nhắn"));
         }
         return  permissions;
     }

@@ -1,6 +1,7 @@
-package com.kit.meta_chat.jwt.user_detail;
+package com.kit.meta_chat.jwt;
 
 import com.kit.meta_chat.jwt.JwtUtil;
+import com.kit.meta_chat.jwt.user_detail.UserPrincipal;
 import com.kit.meta_chat.model.token.Token;
 import com.kit.meta_chat.repository.TokenRepository;
 import lombok.Getter;
@@ -54,7 +55,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (null != user && null != token && token.getExpDate().after(new Date())) {
             Set<GrantedAuthority> authorities = new HashSet<>();
             for (Object role : user.getAuthorities().toArray()) {
-                System.out.println(role);
                 authorities.add(new SimpleGrantedAuthority(role.toString()));
             }
             UsernamePasswordAuthenticationToken authentication =
