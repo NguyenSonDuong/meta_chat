@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +19,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Transactional
 public class Role extends BaseEntity{
 
     @Column(name = "name", nullable = false)
@@ -31,7 +33,7 @@ public class Role extends BaseEntity{
         this.description = description;
     }
 
-    @OneToMany(cascade = {CascadeType.ALL})
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
     @JoinTable(name = "role_permission", joinColumns = {
             @JoinColumn(name = "role_id")
     },

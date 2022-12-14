@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
@@ -31,6 +32,7 @@ import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecuriryConfig {
 
 
@@ -58,7 +60,17 @@ public class SecuriryConfig {
                         httpSecurityExceptionHandlingConfigurer.authenticationEntryPoint(new AuthenticationEntryPoint() {
                             @Override
                             public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-                                System.out.println("e.getMessage()");
+                                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                                String json = ow.writeValueAsString(BaseRespo.builder().code(-1).title("Authentication fails").content(null).status("error").build());
+                                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                                response.setContentType("application/json");
+                                response.setCharacterEncoding("UTF-8");
+                                response.getWriter().write(json);
+                            }
+                        });
+                        httpSecurityExceptionHandlingConfigurer.accessDeniedHandler(new AccessDeniedHandler() {
+                            @Override
+                            public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
                                 ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
                                 String json = ow.writeValueAsString(BaseRespo.builder().code(-1).title("Authentication fails").content(null).status("error").build());
                                 response.setStatus(HttpStatus.UNAUTHORIZED.value());

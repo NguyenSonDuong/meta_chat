@@ -6,10 +6,11 @@ import com.kit.meta_chat.jwt.JwtUtil;
 import com.kit.meta_chat.jwt.user_detail.UserPrincipal;
 import com.kit.meta_chat.mapping.SexMapping;
 import com.kit.meta_chat.mapping.UserMapping;
+import com.kit.meta_chat.message.ErrorMessage;
 import com.kit.meta_chat.model.Permission;
 import com.kit.meta_chat.model.Role;
 import com.kit.meta_chat.model.User;
-import com.kit.meta_chat.model.dto.RoleKey;
+import com.kit.meta_chat.model.key.RoleKey;
 import com.kit.meta_chat.model.dto.UserDTO;
 import com.kit.meta_chat.model.token.Token;
 import com.kit.meta_chat.repository.RoleRepository;
@@ -141,7 +142,16 @@ public class UserServiceImp implements UserService{
 
     @Override
     public boolean deleteUser(String uuid) {
-        return false;
+        if(userRepository.existsByUuid(uuid))
+        {
+            if(userRepository.deleteByUuid(uuid) > 0){
+                return true;
+            }else{
+                throw new UserException(ErrorMessage.ERROR);
+            }
+        }else {
+            throw new UserException(ErrorMessage.ERROR_USER_NOT_EXIT);
+        }
     }
 
     public Set<Permission> GetPremission(String role){

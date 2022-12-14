@@ -11,7 +11,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+
 public interface UserRepository extends JpaRepository<User, Integer> {
+    long deleteByUuid(String uuid);
+    boolean existsByUuid(String uuid);
     User findByEmailAndPassword(String email, String password);
     User findByUsernameAndPassword(String username, String password);
     boolean existsByUsernameOrEmail(String username, String email);

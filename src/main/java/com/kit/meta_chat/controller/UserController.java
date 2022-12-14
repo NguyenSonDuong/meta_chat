@@ -1,25 +1,20 @@
 package com.kit.meta_chat.controller;
 
 
-import com.kit.meta_chat.model.dto.RoleKey;
+import com.kit.meta_chat.message.SuccessMessage;
 import com.kit.meta_chat.model.dto.UserDTO;
 import com.kit.meta_chat.repository.UserRepository;
 import com.kit.meta_chat.request.LoginRequest;
 import com.kit.meta_chat.request.RegisterRequest;
 import com.kit.meta_chat.request.RequestBinding;
+import com.kit.meta_chat.responsive.BaseRespo;
 import com.kit.meta_chat.service.UserService;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-import java.util.List;
-import java.util.Optional;
 
 @RestController()
 @RequestMapping("/user")
@@ -44,6 +39,13 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @PutMapping(value = "/delete/{uuid}")
+    @PreAuthorize("hasAnyAuthority('ADMIN_DELETE_USER')")
+    public ResponseEntity<?> deleteUser(@PathVariable(required = true) String uuid){
+        userService.deleteUser(uuid);
+        return ResponseEntity.ok(BaseRespo.builder().code(-1).status("success").content(null).title(SuccessMessage.UPDATE_SUCCESS).build());
+    }
+
     @PostMapping(value = "/create")
     @PreAuthorize("hasAnyAuthority('ADMIN_CREATE_USER')")
     public ResponseEntity<?> createUser(@RequestBody @Validated RegisterRequest registerRequest , BindingResult result){
@@ -52,9 +54,5 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping(value = "/get")
-    @PreAuthorize("hasAnyAuthority('CUSTOMER_READ_USER')")
-    public ResponseEntity<?> check(){
-       return ResponseEntity.ok("user");
-    }
+
 }

@@ -4,6 +4,7 @@ package com.kit.meta_chat.model;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Data
+@Transactional
 @Table(name = "user", indexes = {
         @Index(name = "user_index", columnList = "username"),
         @Index(name = "uuid_index", columnList = "uuid"),
@@ -37,7 +39,7 @@ public class User extends BaseEntity {
     @Column(name = "sex")
     private Sex sex;
 
-    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinTable(name = "user_role", joinColumns = {
             @JoinColumn(name = "user_id")
     }, inverseJoinColumns = {

@@ -1,4 +1,4 @@
-package com.kit.meta_chat.model.dto;
+package com.kit.meta_chat.model.key;
 
 public class RoleKey {
     // User permission
