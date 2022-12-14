@@ -52,4 +52,9 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @GetMapping(value = "/get")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER_READ_USER')")
+    public ResponseEntity<?> check(){
+       return ResponseEntity.ok("user");
+    }
 }

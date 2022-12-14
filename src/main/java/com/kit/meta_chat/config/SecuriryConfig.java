@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 
 @Configuration
 @EnableWebSecurity
@@ -30,10 +31,11 @@ public class SecuriryConfig {
                 .authorizeRequests(auth-> {
                     try {
                         auth
-                                .mvcMatchers(new String[]{"/user/login","/user/register"}).permitAll()
+                                .antMatchers(new String[]{"/user/login","/user/register"}).permitAll()
                                 .anyRequest().authenticated()
                                 .and()
                                 .formLogin(httpSecurityFormLoginConfigurer -> {
+                                    httpSecurityFormLoginConfigurer.failureForwardUrl("/user/get");
                                     httpSecurityFormLoginConfigurer.failureHandler(authenticationFailureHandler());
                                 });
                     } catch (Exception e) {
@@ -41,8 +43,7 @@ public class SecuriryConfig {
                         throw new RuntimeException(e);
                     }
                 })
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-                .httpBasic().disable();
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
     @Bean

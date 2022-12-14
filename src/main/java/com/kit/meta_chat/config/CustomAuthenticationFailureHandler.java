@@ -22,7 +22,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws  ServletException, IOException {
-        System.out.println(e.getMessage());
+        System.out.println("e.getMessage()");
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json = ow.writeValueAsString(BaseRespo.builder().code(-1).title("Authentication fails").content(null).status("error").build());
         httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
