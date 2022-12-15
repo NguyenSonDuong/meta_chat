@@ -39,6 +39,10 @@ public class User extends BaseEntity {
     @Column(name = "sex")
     private Sex sex;
 
+
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
+    private UserInfo userInfo;
+
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinTable(name = "user_role", joinColumns = {
             @JoinColumn(name = "user_id")

@@ -5,17 +5,17 @@ import com.kit.meta_chat.exception.UserException;
 import com.kit.meta_chat.jwt.JwtUtil;
 import com.kit.meta_chat.jwt.user_detail.UserPrincipal;
 import com.kit.meta_chat.mapping.SexMapping;
+import com.kit.meta_chat.mapping.UserInfoMapping;
 import com.kit.meta_chat.mapping.UserMapping;
 import com.kit.meta_chat.message.ErrorMessage;
-import com.kit.meta_chat.model.Permission;
-import com.kit.meta_chat.model.Role;
-import com.kit.meta_chat.model.User;
+import com.kit.meta_chat.model.*;
 import com.kit.meta_chat.model.key.RoleKey;
 import com.kit.meta_chat.model.dto.UserDTO;
 import com.kit.meta_chat.model.token.Token;
 import com.kit.meta_chat.repository.RoleRepository;
 import com.kit.meta_chat.repository.TokenRepository;
 import com.kit.meta_chat.repository.UserRepository;
+import com.kit.meta_chat.request.UpdateUserInforRequest;
 import com.nimbusds.jose.shaded.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -86,7 +86,7 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
-    public UserDTO createUserInfo(String email, String username, String password, int sex) {
+    public UserDTO createUser(String email, String username, String password) {
         if(userRepository.existsByUsernameOrEmail(username,email))
             throw new UserException("Username or email is exits");
         String role = "USER";
@@ -98,7 +98,7 @@ public class UserServiceImp implements UserService{
 
 
 
-        return createUser(email,username,password,sex,roles);
+        return createUser(email,username,password,-1,roles);
     }
 
     @Override
@@ -106,10 +106,13 @@ public class UserServiceImp implements UserService{
         if(userRepository.existsByUsernameOrEmail(username,email))
             throw new UserException("Username or email is exits");
         String passwordEncrypt = new BCryptPasswordEncoder().encode(password);
+        UserInfo userInfo = new UserInfo();
+        userInfo.setAddress(new Address());
         User user = User.builder()
                 .username(username)
                 .password(passwordEncrypt)
                 .email(email)
+                .userInfo(userInfo)
                 .build();
         user.setRoles(roleSet);
         User userSave = userRepository.saveAndFlush(user);
@@ -120,23 +123,33 @@ public class UserServiceImp implements UserService{
 
     @Override
     public UserDTO register(String email, String username, String password) {
-        return createUserInfo(email,username,password,-1);
+        return createUser(email,username,password);
+    }
+
+    @Override
+    public Object forgotPassword(String email) {
+
+        return null;
     }
 
     @Override
     public List<UserDTO> search(String uuid, String username, String email, int sex) {
-        List<User> users = null;
-        users = userRepository.findByUsernameOrEmailAndUuidAndSexAllIgnoreCaseOrderByUsernameAsc(username,email,uuid, SexMapping.sexMapping(sex));
-        List<UserDTO> userDTOS  = new ArrayList<>();
-        for (User user :
-                users) {
-            userDTOS.add(UserMapping.convertUserDTO(user));
-        }
-        return userDTOS;
+
+        return null;
     }
 
     @Override
     public boolean updateUser(String uuid, User user) {
+        return false;
+    }
+
+    @Override
+    public boolean updateUserInfo(String uuid, UpdateUserInforRequest userInfo) {
+//        User user = userRepository.findByUuid(uuid);
+        UserInfo userInfo1 = UserInfoMapping.requestMapping(userInfo);
+        int user = userRepository.updateUserInfoByUuid(userInfo1,uuid);
+        if(user<0)
+            throw new UserException("Update user infor false");
         return false;
     }
 

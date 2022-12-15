@@ -7,6 +7,7 @@ import com.kit.meta_chat.repository.UserRepository;
 import com.kit.meta_chat.request.LoginRequest;
 import com.kit.meta_chat.request.RegisterRequest;
 import com.kit.meta_chat.request.RequestBinding;
+import com.kit.meta_chat.request.UpdateUserInforRequest;
 import com.kit.meta_chat.responsive.BaseRespo;
 import com.kit.meta_chat.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,19 +40,28 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PutMapping(value = "/delete/{uuid}")
-    @PreAuthorize("hasAnyAuthority('ADMIN_DELETE_USER')")
-    public ResponseEntity<?> deleteUser(@PathVariable(required = true) String uuid){
-        userService.deleteUser(uuid);
-        return ResponseEntity.ok(BaseRespo.builder().code(-1).status("success").content(null).title(SuccessMessage.UPDATE_SUCCESS).build());
-    }
-
-    @PostMapping(value = "/create")
-    @PreAuthorize("hasAnyAuthority('ADMIN_CREATE_USER')")
-    public ResponseEntity<?> createUser(@RequestBody @Validated RegisterRequest registerRequest , BindingResult result){
+    @PostMapping(value = "/update/{uuid}")
+    private ResponseEntity<?> updateInfor(@PathVariable(required = true) String uuid ,@RequestBody @Validated UpdateUserInforRequest userInforRequest, BindingResult result){
         RequestBinding.CheckValidate(result);
-        UserDTO user = userService.register(registerRequest.getEmail(),registerRequest.getUsername(), registerRequest.getPassword());
-        return ResponseEntity.ok(user);
+        if(userService.updateUserInfo(uuid,userInforRequest)){
+            return ResponseEntity.ok(
+                    BaseRespo.builder()
+                            .code(-1)
+                            .status("success")
+                            .content(null)
+                            .title("Update user info success")
+                            .build()
+            );
+        }else{
+            return ResponseEntity.badRequest().body(
+                    BaseRespo.builder()
+                            .code(-1)
+                            .status("error")
+                            .content(null)
+                            .title("Update user info fails")
+                            .build()
+            );
+        }
     }
 
 

@@ -1,6 +1,5 @@
 package com.kit.meta_chat.jwt;
 
-import com.kit.meta_chat.jwt.JwtUtil;
 import com.kit.meta_chat.jwt.user_detail.UserPrincipal;
 import com.kit.meta_chat.model.token.Token;
 import com.kit.meta_chat.repository.TokenRepository;
