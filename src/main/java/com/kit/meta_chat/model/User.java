@@ -51,6 +51,8 @@ public class User extends BaseEntity {
     })
     private Set<Role> roles;
 
+
+
     @PrePersist
     public void preCreateUser() {
         this.uuid = UUID.randomUUID().toString();
