@@ -31,7 +31,7 @@ public class OtpServiceImp implements OtpService{
     @Override
     public OtpGeneral generalCode(User user) {
         OtpGeneral otpGeneral = new OtpGeneral();
-
+        
 
 
 
